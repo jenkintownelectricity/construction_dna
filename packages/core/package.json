@@ -1,0 +1,30 @@
+{
+  "name": "@construction-dna/core",
+  "version": "0.1.0",
+  "description": "Core engine for Construction DNA - CRUD, taxonomy navigation, and engineering Q&A",
+  "main": "dist/index.js",
+  "module": "dist/index.mjs",
+  "types": "dist/index.d.ts",
+  "files": ["dist"],
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@construction-dna/kernel": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "typescript": "^5.3.0"
+  },
+  "keywords": [
+    "construction",
+    "materials",
+    "taxonomy",
+    "engineering",
+    "building"
+  ],
+  "author": "Armand Lefebvre <armand@buildingsystems.ai>",
+  "license": "MIT"
+}
