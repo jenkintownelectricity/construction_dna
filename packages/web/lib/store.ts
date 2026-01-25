@@ -1,8 +1,10 @@
 import { create } from 'zustand';
+import { persist, createJSONStorage } from 'zustand/middleware';
 import type { MaterialDNA } from '@construction-dna/kernel';
 
 interface MaterialsStore {
-  materials: Map<string, MaterialDNA>;
+  // Use Record instead of Map for JSON serialization compatibility
+  materials: Record<string, MaterialDNA>;
 
   // Actions
   addMaterial: (m: MaterialDNA) => void;
@@ -17,43 +19,53 @@ interface MaterialsStore {
   getMaterialCount: () => number;
 }
 
-export const useMaterialsStore = create<MaterialsStore>((set, get) => ({
-  materials: new Map(),
+export const useMaterialsStore = create<MaterialsStore>()(
+  persist(
+    (set, get) => ({
+      materials: {},
 
-  addMaterial: (m) =>
-    set((state) => {
-      const newMap = new Map(state.materials);
-      newMap.set(m.id, m);
-      return { materials: newMap };
+      addMaterial: (m) =>
+        set((state) => ({
+          materials: { ...state.materials, [m.id]: m },
+        })),
+
+      addMaterials: (ms) =>
+        set((state) => {
+          const updated = { ...state.materials };
+          ms.forEach((m) => {
+            updated[m.id] = m;
+          });
+          return { materials: updated };
+        }),
+
+      removeMaterial: (id) =>
+        set((state) => {
+          const updated = { ...state.materials };
+          delete updated[id];
+          return { materials: updated };
+        }),
+
+      clearMaterials: () => set({ materials: {} }),
+
+      updateMaterial: (id, updates) =>
+        set((state) => {
+          const existing = state.materials[id];
+          if (!existing) return state;
+          return {
+            materials: {
+              ...state.materials,
+              [id]: { ...existing, ...updates },
+            },
+          };
+        }),
+
+      getMaterial: (id) => get().materials[id],
+      getAllMaterials: () => Object.values(get().materials),
+      getMaterialCount: () => Object.keys(get().materials).length,
     }),
-
-  addMaterials: (ms) =>
-    set((state) => {
-      const newMap = new Map(state.materials);
-      ms.forEach((m) => newMap.set(m.id, m));
-      return { materials: newMap };
-    }),
-
-  removeMaterial: (id) =>
-    set((state) => {
-      const newMap = new Map(state.materials);
-      newMap.delete(id);
-      return { materials: newMap };
-    }),
-
-  clearMaterials: () => set({ materials: new Map() }),
-
-  updateMaterial: (id, updates) =>
-    set((state) => {
-      const newMap = new Map(state.materials);
-      const existing = newMap.get(id);
-      if (existing) {
-        newMap.set(id, { ...existing, ...updates });
-      }
-      return { materials: newMap };
-    }),
-
-  getMaterial: (id) => get().materials.get(id),
-  getAllMaterials: () => Array.from(get().materials.values()),
-  getMaterialCount: () => get().materials.size,
-}));
+    {
+      name: 'construction-dna-materials', // localStorage key
+      storage: createJSONStorage(() => localStorage),
+    }
+  )
+);
