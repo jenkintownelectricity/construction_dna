@@ -1,33 +1,84 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import Link from 'next/link';
-import { Plus, Search, Package } from 'lucide-react';
+import { Plus, Search, Package, Download, FileJson, FileArchive, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { useMaterialsStore } from '@/lib/store';
+import { exportToJson, exportToZip, downloadFile } from '@/lib/file-processor';
+import type { MaterialDNA } from '@construction-dna/kernel';
 
-// Mock data for now - will be replaced with API calls
-const mockMaterials: Array<{
+interface DisplayMaterial {
   id: string;
   name: string;
   chemistry: string;
   manufacturer: string;
   category: string;
   validated: boolean;
-}> = [];
+}
+
+function transformMaterial(m: MaterialDNA): DisplayMaterial {
+  return {
+    id: m.id,
+    name: m.classification?.tier6_productVariant?.name || m.id || 'Unknown',
+    chemistry: m.physical?.tier7_baseChemistry?.code || '-',
+    manufacturer: m.classification?.tier5_manufacturer?.name ||
+                  m.classification?.tier5_manufacturer?.code || '-',
+    category: m.classification?.tier2_category?.code || '-',
+    validated: !!(m.classification?.tier6_productVariant?.name &&
+                  m.physical?.tier7_baseChemistry?.code),
+  };
+}
 
 export default function MaterialsPage() {
   const [search, setSearch] = useState('');
-  const [materials] = useState(mockMaterials);
+  const [isExporting, setIsExporting] = useState(false);
 
-  const filteredMaterials = materials.filter(
-    (m) =>
-      m.name.toLowerCase().includes(search.toLowerCase()) ||
-      m.chemistry.toLowerCase().includes(search.toLowerCase()) ||
-      m.manufacturer.toLowerCase().includes(search.toLowerCase())
+  const allMaterials = useMaterialsStore((s) => s.getAllMaterials());
+  const materialCount = useMaterialsStore((s) => s.getMaterialCount());
+  const clearMaterials = useMaterialsStore((s) => s.clearMaterials);
+
+  const displayMaterials = useMemo(
+    () => allMaterials.map(transformMaterial),
+    [allMaterials]
   );
+
+  const filteredMaterials = useMemo(
+    () =>
+      displayMaterials.filter(
+        (m) =>
+          m.name.toLowerCase().includes(search.toLowerCase()) ||
+          m.chemistry.toLowerCase().includes(search.toLowerCase()) ||
+          m.manufacturer.toLowerCase().includes(search.toLowerCase())
+      ),
+    [displayMaterials, search]
+  );
+
+  const handleExportJson = () => {
+    if (allMaterials.length === 0) return;
+    const json = exportToJson(allMaterials);
+    downloadFile(json, `materials-${Date.now()}.json`);
+  };
+
+  const handleExportZip = async () => {
+    if (allMaterials.length === 0) return;
+    setIsExporting(true);
+    try {
+      const blob = await exportToZip(allMaterials);
+      downloadFile(blob, `materials-${Date.now()}.zip`);
+    } finally {
+      setIsExporting(false);
+    }
+  };
+
+  const handleClearAll = () => {
+    if (confirm('Are you sure you want to clear all materials? This cannot be undone.')) {
+      clearMaterials();
+    }
+  };
 
   return (
     <div className="p-8">
@@ -38,13 +89,51 @@ export default function MaterialsPage() {
           <p className="text-muted-foreground">
             Browse and manage material DNA records
           </p>
+          {materialCount > 0 && (
+            <Badge variant="secondary" className="mt-2">
+              {materialCount} materials in library
+            </Badge>
+          )}
         </div>
-        <Link href="/materials/new">
-          <Button>
-            <Plus className="h-4 w-4 mr-2" />
-            New Material
-          </Button>
-        </Link>
+        <div className="flex gap-2">
+          {materialCount > 0 && (
+            <>
+              <Button variant="outline" onClick={handleExportJson} title="Export as JSON">
+                <FileJson className="h-4 w-4 mr-2" />
+                JSON
+              </Button>
+              <Button
+                variant="outline"
+                onClick={handleExportZip}
+                disabled={isExporting}
+                title="Export as ZIP"
+              >
+                <FileArchive className="h-4 w-4 mr-2" />
+                ZIP
+              </Button>
+              <Button
+                variant="outline"
+                onClick={handleClearAll}
+                className="text-destructive hover:text-destructive"
+                title="Clear all materials"
+              >
+                <Trash2 className="h-4 w-4" />
+              </Button>
+            </>
+          )}
+          <Link href="/import">
+            <Button variant="outline">
+              <Download className="h-4 w-4 mr-2" />
+              Import
+            </Button>
+          </Link>
+          <Link href="/materials/new">
+            <Button>
+              <Plus className="h-4 w-4 mr-2" />
+              New Material
+            </Button>
+          </Link>
+        </div>
       </div>
 
       {/* Filters */}
@@ -70,15 +159,23 @@ export default function MaterialsPage() {
               <p className="text-sm mb-4">
                 {search
                   ? 'Try adjusting your search'
-                  : 'Get started by adding your first material'}
+                  : 'Get started by importing or adding your first material'}
               </p>
               {!search && (
-                <Link href="/materials/new">
-                  <Button>
-                    <Plus className="h-4 w-4 mr-2" />
-                    Add Material
-                  </Button>
-                </Link>
+                <div className="flex gap-2 justify-center">
+                  <Link href="/import">
+                    <Button variant="outline">
+                      <Download className="h-4 w-4 mr-2" />
+                      Import Materials
+                    </Button>
+                  </Link>
+                  <Link href="/materials/new">
+                    <Button>
+                      <Plus className="h-4 w-4 mr-2" />
+                      Add Material
+                    </Button>
+                  </Link>
+                </div>
               )}
             </div>
           </CardContent>
