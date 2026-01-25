@@ -54,14 +54,18 @@ export class DNAUpdate {
     }
 
     // Deep merge updates into existing
-    const merged = this.deepMerge(existing, updates);
+    const merged = this.deepMerge(
+      existing as unknown as Record<string, unknown>,
+      updates as unknown as Record<string, unknown>,
+    ) as unknown as MaterialDNA;
 
     // Update metadata
     const now = new Date().toISOString();
+    const existingMetadata = merged.metadata || {};
     merged.metadata = {
-      ...merged.metadata,
+      ...existingMetadata,
       updated: now,
-      version: (merged.metadata?.version || 0) + 1,
+      version: ((existingMetadata as { version?: number }).version || 0) + 1,
     };
 
     // Regenerate taxonomy code
@@ -84,7 +88,7 @@ export class DNAUpdate {
     }
 
     // Recalculate completeness
-    merged.metadata.completeness = calculateCompleteness(merged);
+    (merged.metadata as { completeness?: number }).completeness = calculateCompleteness(merged);
 
     // Validate if enabled
     if (this.options.validateOnWrite) {
@@ -215,8 +219,11 @@ export class DNAUpdate {
   /**
    * Deep merge two objects
    */
-  private deepMerge<T extends Record<string, unknown>>(target: T, source: Partial<T>): T {
-    const result = { ...target };
+  private deepMerge(
+    target: Record<string, unknown>,
+    source: Record<string, unknown>,
+  ): Record<string, unknown> {
+    const result: Record<string, unknown> = { ...target };
 
     for (const key in source) {
       const sourceValue = source[key];
@@ -233,9 +240,9 @@ export class DNAUpdate {
         result[key] = this.deepMerge(
           targetValue as Record<string, unknown>,
           sourceValue as Record<string, unknown>,
-        ) as T[Extract<keyof T, string>];
+        );
       } else if (sourceValue !== undefined) {
-        result[key] = sourceValue as T[Extract<keyof T, string>];
+        result[key] = sourceValue;
       }
     }
 

@@ -250,8 +250,8 @@ export class DNARead {
       filtered.sort((a, b) => {
         const aVal = this.getNestedValue(a, filters.sortBy!);
         const bVal = this.getNestedValue(b, filters.sortBy!);
-        if (aVal === undefined) return 1;
-        if (bVal === undefined) return -1;
+        if (aVal === undefined || aVal === null) return 1;
+        if (bVal === undefined || bVal === null) return -1;
         if (aVal < bVal) return -sortOrder;
         if (aVal > bVal) return sortOrder;
         return 0;

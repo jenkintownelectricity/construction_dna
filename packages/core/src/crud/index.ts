@@ -6,9 +6,9 @@
 
 import type { MaterialDNA } from '@construction-dna/kernel';
 import type { StorageAdapter } from '../storage';
-import { DNACreate, DNAValidationError } from './create';
+import { DNACreate } from './create';
 import { DNARead } from './read';
-import { DNAUpdate, DNANotFoundError } from './update';
+import { DNAUpdate } from './update';
 import { DNADelete } from './delete';
 import type { DNAFilters, ImportResult, CreateOptions, UpdateOptions } from './types';
 
@@ -29,10 +29,7 @@ export class DNACrud {
   private updateOps: DNAUpdate;
   private deleteOps: DNADelete;
 
-  constructor(
-    private storage: StorageAdapter,
-    options: CrudOptions = {},
-  ) {
+  constructor(storage: StorageAdapter, options: CrudOptions = {}) {
     const createOptions: CreateOptions = {
       validateOnWrite: options.validateOnWrite ?? false,
       generateId: true,

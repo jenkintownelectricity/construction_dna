@@ -5,12 +5,7 @@
  */
 
 import type { MaterialDNA } from '@construction-dna/kernel';
-import {
-  DIVISIONS,
-  CATEGORIES,
-  MANUFACTURERS,
-  getTierName,
-} from '@construction-dna/kernel';
+import { DIVISIONS, CATEGORIES, MANUFACTURERS } from '@construction-dna/kernel';
 import type { StorageAdapter } from '../storage';
 import type { TaxonomyNode, TaxonomyTree } from './types';
 
@@ -18,14 +13,16 @@ import type { TaxonomyNode, TaxonomyTree } from './types';
  * Builds taxonomy tree from materials
  */
 export class TaxonomyTreeBuilder {
-  constructor(private storage: StorageAdapter) {}
+  private storage?: StorageAdapter;
+
+  constructor(storage?: StorageAdapter) {
+    this.storage = storage;
+  }
 
   /**
-   * Build the complete taxonomy tree
+   * Build taxonomy tree from an array of materials (synchronous)
    */
-  async buildTree(maxTier: number = 6): Promise<TaxonomyTree> {
-    const materials = await this.storage.getAll();
-
+  buildFromMaterials(materials: MaterialDNA[], maxTier: number = 6): TaxonomyTree {
     const root: TaxonomyNode = {
       tier: 0,
       code: 'ROOT',
@@ -59,14 +56,12 @@ export class TaxonomyTreeBuilder {
       };
 
       if (maxTier >= 2) {
-        // Build Tier 2: Categories
-        await this.buildCategoryTier(divisionNode, divMaterials, maxTier);
+        this.buildCategoryTier(divisionNode, divMaterials, maxTier);
       }
 
       root.children.push(divisionNode);
     }
 
-    // Sort children by code
     this.sortChildren(root);
 
     return {
@@ -79,13 +74,24 @@ export class TaxonomyTreeBuilder {
   }
 
   /**
+   * Build the complete taxonomy tree (async, uses storage)
+   */
+  async buildTree(maxTier: number = 6): Promise<TaxonomyTree> {
+    if (!this.storage) {
+      throw new Error('Storage adapter required for async buildTree');
+    }
+    const materials = await this.storage.getAll();
+    return this.buildFromMaterials(materials, maxTier);
+  }
+
+  /**
    * Build Tier 2: Categories
    */
-  private async buildCategoryTier(
+  private buildCategoryTier(
     parent: TaxonomyNode,
     materials: MaterialDNA[],
     maxTier: number,
-  ): Promise<void> {
+  ): void {
     const groups = this.groupBy(
       materials,
       (m) => m.classification.tier2_category?.code,
@@ -107,7 +113,7 @@ export class TaxonomyTreeBuilder {
       };
 
       if (maxTier >= 3) {
-        await this.buildAssemblyTypeTier(node, groupMaterials, maxTier);
+        this.buildAssemblyTypeTier(node, groupMaterials, maxTier);
       }
 
       parent.children.push(node);
@@ -119,11 +125,11 @@ export class TaxonomyTreeBuilder {
   /**
    * Build Tier 3: Assembly Types
    */
-  private async buildAssemblyTypeTier(
+  private buildAssemblyTypeTier(
     parent: TaxonomyNode,
     materials: MaterialDNA[],
     maxTier: number,
-  ): Promise<void> {
+  ): void {
     const groups = this.groupBy(
       materials,
       (m) => m.classification.tier3_assemblyType?.code,
@@ -143,7 +149,7 @@ export class TaxonomyTreeBuilder {
       };
 
       if (maxTier >= 4) {
-        await this.buildConditionTier(node, groupMaterials, maxTier);
+        this.buildConditionTier(node, groupMaterials, maxTier);
       }
 
       parent.children.push(node);
@@ -155,11 +161,11 @@ export class TaxonomyTreeBuilder {
   /**
    * Build Tier 4: Conditions
    */
-  private async buildConditionTier(
+  private buildConditionTier(
     parent: TaxonomyNode,
     materials: MaterialDNA[],
     maxTier: number,
-  ): Promise<void> {
+  ): void {
     const groups = this.groupBy(
       materials,
       (m) => m.classification.tier4_condition?.code,
@@ -179,7 +185,7 @@ export class TaxonomyTreeBuilder {
       };
 
       if (maxTier >= 5) {
-        await this.buildManufacturerTier(node, groupMaterials, maxTier);
+        this.buildManufacturerTier(node, groupMaterials, maxTier);
       }
 
       parent.children.push(node);
@@ -191,11 +197,11 @@ export class TaxonomyTreeBuilder {
   /**
    * Build Tier 5: Manufacturers
    */
-  private async buildManufacturerTier(
+  private buildManufacturerTier(
     parent: TaxonomyNode,
     materials: MaterialDNA[],
     maxTier: number,
-  ): Promise<void> {
+  ): void {
     const groups = this.groupBy(
       materials,
       (m) => m.classification.tier5_manufacturer?.code,
@@ -216,7 +222,7 @@ export class TaxonomyTreeBuilder {
       };
 
       if (maxTier >= 6) {
-        await this.buildProductTier(node, groupMaterials);
+        this.buildProductTier(node, groupMaterials);
       }
 
       parent.children.push(node);
@@ -228,10 +234,7 @@ export class TaxonomyTreeBuilder {
   /**
    * Build Tier 6: Products (leaf nodes for classification)
    */
-  private async buildProductTier(
-    parent: TaxonomyNode,
-    materials: MaterialDNA[],
-  ): Promise<void> {
+  private buildProductTier(parent: TaxonomyNode, materials: MaterialDNA[]): void {
     for (const material of materials) {
       const code = material.classification.tier6_productVariant?.code;
       if (!code) continue;

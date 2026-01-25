@@ -291,7 +291,7 @@ export const COMPATIBILITY_RULES: CompatibilityEntry[] = [
     status: 'conditional',
     reason: 'Concrete must cure to allow moisture escape.',
     requirement: 'Wait minimum 28 days for concrete cure',
-    source: 'best-practice',
+    source: 'industry',
     verified: true,
   },
   {

@@ -5,14 +5,7 @@
  * For full schema validation, use the Zod schemas in ../schemas
  */
 
-import type {
-  MaterialDNA,
-  MaterialDNAMetadata,
-  Classification,
-  PhysicalProperties,
-  PerformanceMetrics,
-  EngineeringDNA,
-} from '../types';
+import type { MaterialDNA } from '../types';
 
 // ============================================
 // VALIDATION RESULT TYPES
@@ -81,7 +74,9 @@ export function validateMaterialDNA(dna: unknown): ValidationResult {
     });
   } else {
     const classErrors = validateClassification(d.classification);
-    errors.push(...classErrors.map((e) => ({ ...e, path: `classification.${e.path}` })));
+    for (const err of classErrors) {
+      errors.push({ ...err, path: `classification.${err.path}` });
+    }
   }
 
   // Validate physical properties
@@ -93,7 +88,9 @@ export function validateMaterialDNA(dna: unknown): ValidationResult {
     });
   } else {
     const physErrors = validatePhysicalProperties(d.physical);
-    errors.push(...physErrors.map((e) => ({ ...e, path: `physical.${e.path}` })));
+    for (const err of physErrors) {
+      errors.push({ ...err, path: `physical.${err.path}` });
+    }
   }
 
   // Validate performance metrics
@@ -105,7 +102,9 @@ export function validateMaterialDNA(dna: unknown): ValidationResult {
     });
   } else {
     const perfErrors = validatePerformanceMetrics(d.performance);
-    errors.push(...perfErrors.map((e) => ({ ...e, path: `performance.${e.path}` })));
+    for (const err of perfErrors) {
+      errors.push({ ...err, path: `performance.${err.path}` });
+    }
   }
 
   // Validate engineering DNA
@@ -117,7 +116,9 @@ export function validateMaterialDNA(dna: unknown): ValidationResult {
     });
   } else {
     const engErrors = validateEngineeringDNA(d.engineering);
-    errors.push(...engErrors.map((e) => ({ ...e, path: `engineering.${e.path}` })));
+    for (const err of engErrors) {
+      errors.push({ ...err, path: `engineering.${err.path}` });
+    }
   }
 
   // Validate metadata
@@ -144,10 +145,8 @@ export function validateMaterialDNA(dna: unknown): ValidationResult {
 // SECTION VALIDATORS
 // ============================================
 
-function validateClassification(
-  classification: unknown,
-): Omit<ValidationError, 'path'>[] {
-  const errors: Omit<ValidationError, 'path'>[] = [];
+function validateClassification(classification: unknown): ValidationError[] {
+  const errors: ValidationError[] = [];
   const c = classification as Record<string, unknown>;
 
   const requiredTiers = [
@@ -181,10 +180,8 @@ function validateClassification(
   return errors;
 }
 
-function validatePhysicalProperties(
-  physical: unknown,
-): Omit<ValidationError, 'path'>[] {
-  const errors: Omit<ValidationError, 'path'>[] = [];
+function validatePhysicalProperties(physical: unknown): ValidationError[] {
+  const errors: ValidationError[] = [];
   const p = physical as Record<string, unknown>;
 
   const requiredTiers = [
@@ -209,10 +206,8 @@ function validatePhysicalProperties(
   return errors;
 }
 
-function validatePerformanceMetrics(
-  performance: unknown,
-): Omit<ValidationError, 'path'>[] {
-  const errors: Omit<ValidationError, 'path'>[] = [];
+function validatePerformanceMetrics(performance: unknown): ValidationError[] {
+  const errors: ValidationError[] = [];
   const p = performance as Record<string, unknown>;
 
   const requiredTiers = [
@@ -235,10 +230,8 @@ function validatePerformanceMetrics(
   return errors;
 }
 
-function validateEngineeringDNA(
-  engineering: unknown,
-): Omit<ValidationError, 'path'>[] {
-  const errors: Omit<ValidationError, 'path'>[] = [];
+function validateEngineeringDNA(engineering: unknown): ValidationError[] {
+  const errors: ValidationError[] = [];
   const e = engineering as Record<string, unknown>;
 
   if (!Array.isArray(e.tier17_failureModes)) {
