@@ -15,13 +15,24 @@ A standalone, pluggable system that extracts the complete "genetic code" of cons
 ```
 construction-dna/
 ├── packages/
-│   └── kernel/                 # Core DNA taxonomy engine
-│       ├── src/
-│       │   ├── types/          # 20-tier TypeScript interfaces
-│       │   ├── data/           # Predefined chemistries, failures, compatibility
-│       │   ├── utils/          # Taxonomy codes, validation
-│       │   └── schemas/        # Zod validation schemas
-│       └── package.json
+│   ├── kernel/                 # Core DNA taxonomy engine
+│   │   ├── src/
+│   │   │   ├── types/          # 20-tier TypeScript interfaces
+│   │   │   ├── data/           # Predefined chemistries, failures, compatibility
+│   │   │   ├── utils/          # Taxonomy codes, validation
+│   │   │   └── schemas/        # Zod validation schemas
+│   │   └── package.json
+│   │
+│   └── web/                    # Next.js Web Dashboard
+│       ├── app/                # App router pages
+│       │   ├── materials/      # Material browser & detail pages
+│       │   ├── import/         # Import JSON/ZIP files
+│       │   ├── ask/            # Engineering Q&A
+│       │   ├── compatibility/  # Material compatibility checker
+│       │   └── taxonomy/       # Taxonomy explorer
+│       ├── components/         # UI components (shadcn/ui)
+│       └── lib/                # Store, utilities, migrations
+│
 ├── package.json                # Monorepo root
 └── pnpm-workspace.yaml
 ```
@@ -30,11 +41,20 @@ construction-dna/
 
 | Package | Description | Status |
 |---------|-------------|--------|
-| `@construction-dna/kernel` | Core taxonomy types, data, and utilities | Ready |
-| `@construction-dna/core` | DNA CRUD operations, navigation | Planned |
-| `@construction-dna/fastbrain` | Fast inference engine (Groq/BitNet) | Planned |
-| `@construction-dna/trainer-ui` | Skills Trainer UI (pluggable) | Planned |
+| `@construction-dna/kernel` | Core taxonomy types, data, and utilities | **Ready** |
+| `@construction-dna/web` | Next.js dashboard with Material Browser | **Ready** |
+| `@construction-dna/assemblies` | Assembly definitions (layer stacks) | Planned |
 | `@construction-dna/cli` | CLI tool (`cdna`) | Planned |
+
+## Web Dashboard Features
+
+- **Material Browser** - View all imported materials with search/filter
+- **Material Detail Page** - All 20 DNA tiers with spec sheet links
+- **Import/Export** - JSON and ZIP file support with garbage filtering
+- **Engineering Q&A** - Ask questions about materials
+- **Compatibility Checker** - Check material compatibility
+- **Taxonomy Explorer** - Browse the 20-tier structure
+- **localStorage Persistence** - Data survives browser refresh
 
 ## 20-Tier DNA Taxonomy
 
@@ -45,7 +65,7 @@ TIER 1-6: CLASSIFICATION (What is it?)
 ├── Tier 3:  Assembly Type (Edge, Penetration, etc.)
 ├── Tier 4:  Condition (Parapet, Curb, etc.)
 ├── Tier 5:  Manufacturer (GCP, Carlisle, etc.)
-├── Tier 6:  Product Variant (Specific SKU)
+├── Tier 6:  Product Variant (Specific SKU + Spec Sheet URL)
 
 TIER 7-12: PHYSICAL PROPERTIES (What is it made of?)
 ├── Tier 7:  Base Chemistry (SBS, APP, TPO, EPDM, etc.)
@@ -70,11 +90,30 @@ TIER 17-20: ENGINEERING DNA (How does it behave?)
 
 ## Quick Start
 
-```bash
-# Install
-pnpm add @construction-dna/kernel
+### Install Dependencies
 
-# Import
+```bash
+pnpm install
+```
+
+### Run Web Dashboard
+
+```bash
+cd packages/web
+pnpm dev
+# Open http://localhost:3001
+```
+
+### Import Materials
+
+1. Navigate to `/import`
+2. Drag & drop JSON or ZIP files
+3. Review preview and click "Import"
+4. View materials at `/materials`
+
+### Use Kernel Package
+
+```typescript
 import {
   MaterialDNA,
   BASE_CHEMISTRIES,
@@ -83,61 +122,14 @@ import {
   generateTaxonomyCode,
   validateMaterialDNA,
 } from '@construction-dna/kernel';
-```
 
-## Usage Examples
-
-### Check Material Compatibility
-
-```typescript
-import { checkCompatibility, getIncompatibilities } from '@construction-dna/kernel';
-
-// Check if EPDM is compatible with asphalt
+// Check compatibility
 const result = checkCompatibility('EPDM', 'asphalt');
 // { status: 'incompatible', reason: 'Asphalt oils migrate into EPDM...' }
 
-// Get all EPDM incompatibilities
-const epdmIncompat = getIncompatibilities('EPDM');
-// Returns: petroleum products, asphalt, greases, oils...
-```
-
-### Get Failure Modes
-
-```typescript
-import { getFailureModesForChemistry, getFailureModesByCategory } from '@construction-dna/kernel';
-
-// Get failure modes affecting TPO
-const tpoFailures = getFailureModesForChemistry('TPO');
-
-// Get all moisture-related failures
-const moistureFailures = getFailureModesByCategory('moisture');
-```
-
-### Generate Taxonomy Code
-
-```typescript
-import { generateTaxonomyCode, parseTaxonomyCode } from '@construction-dna/kernel';
-
-// Generate code from DNA
-const code = generateTaxonomyCode(materialDNA);
-// "07-WP-FW-FT-GCP-B3K-SBS-PF-SF-T60-BLK-FA-PI-TH-EF-TC-AMTW-22-11-IAFU"
-
-// Parse code back to components
-const parsed = parseTaxonomyCode(code);
-// { tier1: '07', tier2: 'WP', ... }
-```
-
-### Validate DNA
-
-```typescript
-import { validateMaterialDNA, MaterialDNASchema } from '@construction-dna/kernel';
-
-// Basic validation
-const result = validateMaterialDNA(unknownData);
+// Validate DNA
+const validation = validateMaterialDNA(unknownData);
 // { valid: true, errors: [], warnings: [], completeness: 85 }
-
-// Zod schema validation
-const parsed = MaterialDNASchema.safeParse(unknownData);
 ```
 
 ## Development
@@ -149,9 +141,16 @@ pnpm install
 # Build all packages
 pnpm build
 
-# Run tests
-pnpm test
+# Run web dashboard in development
+pnpm --filter @construction-dna/web dev
+
+# Run kernel tests
+pnpm --filter @construction-dna/kernel test
 ```
+
+## Changelog
+
+See [CHANGELOG.md](./CHANGELOG.md) for version history.
 
 ## License
 
