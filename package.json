@@ -1,0 +1,23 @@
+{
+  "name": "@construction-dna/monorepo",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Construction DNA - 20-Tier Material Taxonomy System",
+  "author": "BuildingSystems.ai",
+  "license": "MIT",
+  "scripts": {
+    "build": "pnpm -r build",
+    "dev": "pnpm -r dev",
+    "test": "pnpm -r test",
+    "lint": "pnpm -r lint",
+    "clean": "pnpm -r clean"
+  },
+  "devDependencies": {
+    "@types/node": "^20.10.0",
+    "typescript": "^5.3.0"
+  },
+  "engines": {
+    "node": ">=18.0.0",
+    "pnpm": ">=8.0.0"
+  }
+}
