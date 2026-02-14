@@ -7,6 +7,26 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added - 2026-02-14
+
+#### Song Kernel (`@construction-dna/song-kernel`)
+
+- **Song Kernel v1.1 Schema** — Complete TypeScript types and Zod validation for song production briefs
+  - Artist identity (name, vocal style, influences)
+  - Song metadata (title, genre, BPM, key, mood tags, structure)
+  - Emotional arc (opening, midpoint, climax, resolution)
+  - Cultural DNA (city/setting, cultural references)
+  - Beat kernel cross-reference support
+- **Beat Kernel v1 Schema** — Full beat pattern DNA encoding
+  - Transport config (BPM, swing, time signature, key, scale)
+  - Drum channel definitions (8 channels, 16-step patterns with per-step velocities)
+  - Instrument channel definitions (bass, piano, strings, lead, pluck with MIDI note sequences)
+  - Master effects chain (reverb, delay, compressor, EQ)
+  - Arrangement metadata
+- **Zod Validation** — Runtime validation schemas for both Song Kernel and Beat Kernel
+- **Default Factories** — `createDefaultSongKernel()` and `createDefaultBeatKernel()` for quick instantiation
+- **Public API** — Clean barrel exports via `index.ts`
+
 ### Added - 2026-01-25
 
 #### Web Dashboard (`@construction-dna/web`)
@@ -123,6 +143,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 | L0-CMD-2026-0125-005 | Fix Import/Export with ZIP support | Complete |
 | L0-CMD-2026-0125-006 | Fix Materials Browser not reading from store | Complete |
 | L0-CMD-2026-0125-007 | Add Material Detail page with spec sheets | Complete |
+| L0-CMD-2026-0214-005 | Song Kernel v1.1 + Beat Kernel v1 schemas | Complete |
+
+### Commits (claude/lightning-studio-music-kernel-MKeUe)
+
+```
+3eff9a4 feat: add Song Kernel v1.1 + Beat Kernel v1 schemas with types, Zod validation, and defaults
+```
 
 ### Commits (claude/create-dna-kernel-JpijI)
 
@@ -148,4 +175,4 @@ cad97e5 feat(kernel): add 20-tier Material DNA taxonomy type definitions
 
 ---
 
-Built with Claude Code | Session: 2026-01-25
+Built with Claude Code | Sessions: 2026-01-25, 2026-02-14

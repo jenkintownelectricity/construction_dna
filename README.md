@@ -23,6 +23,14 @@ construction-dna/
 │   │   │   └── schemas/        # Zod validation schemas
 │   │   └── package.json
 │   │
+│   ├── song-kernel/            # Song Kernel + Beat Kernel schemas
+│   │   ├── src/
+│   │   │   ├── types.ts        # Song Kernel v1.1 + Beat Kernel v1 TypeScript types
+│   │   │   ├── schema.ts       # Zod validation schemas for both kernels
+│   │   │   ├── defaults.ts     # Default factory functions
+│   │   │   └── index.ts        # Public API exports
+│   │   └── package.json
+│   │
 │   └── web/                    # Next.js Web Dashboard
 │       ├── app/                # App router pages
 │       │   ├── materials/      # Material browser & detail pages
@@ -43,6 +51,7 @@ construction-dna/
 |---------|-------------|--------|
 | `@construction-dna/kernel` | Core taxonomy types, data, and utilities | **Ready** |
 | `@construction-dna/web` | Next.js dashboard with Material Browser | **Ready** |
+| `@construction-dna/song-kernel` | Song Kernel v1.1 + Beat Kernel v1 schemas for Lightning Studio | **Ready** |
 | `@construction-dna/assemblies` | Assembly definitions (layer stacks) | Planned |
 | `@construction-dna/cli` | CLI tool (`cdna`) | Planned |
 
