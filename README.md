@@ -148,6 +148,35 @@ pnpm --filter @construction-dna/web dev
 pnpm --filter @construction-dna/kernel test
 ```
 
+## Build Status
+
+| Package | Description | Status |
+|---------|-------------|--------|
+| `@construction-dna/kernel` | Core taxonomy types, data, and utilities | **Ready** |
+| `@construction-dna/web` | Next.js dashboard with Material Browser | **Ready** |
+| `@construction-dna/assemblies` | Assembly definitions (layer stacks) | Planned |
+| `@construction-dna/cli` | CLI tool (`cdna`) | Planned |
+
+**Current Milestone:** Kernel + Web dashboard ready for deployment. Assembly and CLI packages planned.
+
+---
+
+## LDS Ecosystem
+
+This repository is part of the Lefebvre Design Solutions construction technology platform:
+
+| Repository | Description | Status |
+|-----------|-------------|--------|
+| [SUPA-SAINT](https://github.com/jenkintownelectricity/SUPA-SAINT) | Unified GCP/Saint-Gobain Super App (18 entities) | Assembler Phase |
+| [GPC_Shop_Drawings](https://github.com/jenkintownelectricity/GPC_Shop_Drawings) | AI-powered shop drawing production | Alpha Complete |
+| **construction_dna** (this repo) | 20-tier material DNA taxonomy | Kernel Ready |
+| [construction_development_scraper](https://github.com/jenkintownelectricity/construction_development_scraper) | Groq-based opportunity discovery | Production |
+| [holograph_details](https://github.com/jenkintownelectricity/holograph_details) | 3D BIM detail viewer (multi-tenant SaaS) | Demo Ready |
+
+All repositories governed under LDS L0-command architecture with ValidKernel deterministic trust.
+
+---
+
 ## Changelog
 
 See [CHANGELOG.md](./CHANGELOG.md) for version history.
@@ -158,4 +187,14 @@ MIT for open-source use. Commercial license available for enterprise features.
 
 ---
 
+## Governance
+
+- **L0 Authority:** Armand Lefebvre, President, Lefebvre Design Solutions LLC
+- **L1 Kernel:** ValidKernel deterministic trust infrastructure
+- **L2 Proposers:** Claude Code / AI agents (bounded execution)
+
+---
+
 Built by [BuildingSystems.ai](https://buildingsystems.ai) | Designed by Armand Lefebvre
+
+*Last Updated: 2026-02-15*
